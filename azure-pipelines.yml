@@ -27,13 +27,13 @@ steps:
       platform: '$(buildPlatform)'
       configuration: '$(buildConfiguration)'
 
-  - task: CopyFiles@2
+  - task: GitHubRelease@1
+    displayName: 'GitHub release (create)'
     inputs:
-      SourceFolder: '$(Build.SourcesDirectory)\$(Build.Repository.Name)\bin\$(BuildConfiguration)'
-      Contents: '**/?(*.exe|*.dll)'
-      TargetFolder: '$(Build.ArtifactStagingDirectory)'
-
-  - task: PublishBuildArtifacts@1
-    inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-      ArtifactName: 'RiotLauncher'
+      gitHubConnection: GitHub
+      repositoryName: aPinat/RiotLauncher
+      tagSource: userSpecifiedTag
+      tag: '$(Build.BuildNumber)'
+      title: 'RiotLauncher $(Build.BuildNumber)'
+      releaseNotesSource: inline
+      assets: '$(System.DefaultWorkingDirectory)/**/bin/**/*.exe'
