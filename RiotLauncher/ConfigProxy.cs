@@ -177,6 +177,11 @@ namespace RiotLauncher
                         configObject["lol.client_settings.chat.query_sumid_muc_participants"] = true;
                     }
                     
+                    if (configObject.ContainsKey("lol.client_settings.chat.query_sumid_batched_ledge"))
+                    {
+                        configObject["lol.client_settings.chat.query_sumid_batched_ledge"] = true;
+                    }
+                    
                     if (configObject["keystone.products.league_of_legends.patchlines.live"]?["platforms"]?["win"]?["configurations"] != null)
                     {
                         foreach (var jToken in configObject["keystone.products.league_of_legends.patchlines.live"]["platforms"]["win"]["configurations"].Children())
