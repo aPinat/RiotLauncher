@@ -16,7 +16,7 @@ namespace RiotLauncher
 
             var data = JObject.Parse(File.ReadAllText(installPath));
             var rcPaths = new List<string>();
-            
+
             if (data.ContainsKey("rc_default")) rcPaths.Add(data["rc_default"].ToString());
             if (data.ContainsKey("rc_live")) rcPaths.Add(data["rc_live"].ToString());
             if (data.ContainsKey("rc_beta")) rcPaths.Add(data["rc_beta"].ToString());
