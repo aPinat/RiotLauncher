@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
@@ -16,7 +17,6 @@ namespace RiotLauncher
     internal class ConfigProxy
     {
         private readonly HttpClient _client = new HttpClient();
-        internal int ConfigPort { get; }
 
         /**
          * Starts a new client configuration proxy at a random port. The proxy will modify any responses
@@ -46,6 +46,8 @@ namespace RiotLauncher
             ConfigPort = port;
         }
 
+        internal int ConfigPort { get; }
+
         /**
          * Proxies any request made to this web server to the clientconfig service. Rewrites the response
          * to have any chat servers point to localhost at the specified port.
@@ -70,58 +72,66 @@ namespace RiotLauncher
                 var result = await _client.SendAsync(message);
                 var content = await result.Content.ReadAsStringAsync();
                 var modifiedContent = content;
-                Console.WriteLine(modifiedContent);
 
                 try
                 {
                     var configObject = JObject.Parse(content);
 
-                    //if (configObject.ContainsKey("keystone.client.feature_flags.flaggedNameModal.disabled")) configObject["keystone.client.feature_flags.flaggedNameModal.disabled"] = false;
-                    //if (configObject.ContainsKey("keystone.client.feature_flags.lifecycle.leagueRegionElection.enabled")) configObject["keystone.client.feature_flags.lifecycle.leagueRegionElection.enabled"] = true;
-                    if (configObject.ContainsKey("keystone.client.feature_flags.login.disabled")) configObject["keystone.client.feature_flags.login.disabled"] = false;
-                    //if (configObject.ContainsKey("keystone.client.feature_flags.regionlessLogin.enabled")) configObject["keystone.client.feature_flags.regionlessLogin.enabled"] = true;
-                    if (configObject.ContainsKey("keystone.client.feature_flags.regionlessLoginInfoTooltip.enabled"))
-                        configObject["keystone.client.feature_flags.regionlessLoginInfoTooltip.enabled"] = false;
-                    //if (configObject.ContainsKey("keystone.client.feature_flags.system_tray.enabled")) configObject["keystone.client.feature_flags.system_tray.enabled"] = true;
-                    if (configObject.ContainsKey("keystone.client_config.total_configs_to_save")) configObject["keystone.client_config.total_configs_to_save"] = "5";
+                    // configObject["keystone.client.feature_flags.autoLaunch.disabled"]?.Replace(true);
+                    // configObject["keystone.client.feature_flags.autoPatch.disabled"]?.Replace(true);
+                    configObject["keystone.client.feature_flags.login.disabled"]?.Replace(false);
+                    configObject["keystone.client.feature_flags.privacyPolicy.enabled"]?.Replace(false);
+                    configObject["keystone.client.feature_flags.regionlessLoginInfoTooltip.enabled"]?.Replace(false);
+                    // configObject["keystone.client.feature_flags.system_tray.enabled"]?.Replace(true);
+                    configObject["keystone.client_config.diagnostics_enabled"]?.Replace(false);
+                    configObject["keystone.client_config.total_configs_to_save"]?.Replace(5);
 
-                    if (configObject.ContainsKey("chat.aggressive_scan.enabled")) configObject["chat.aggressive_scan.enabled"] = true;
-                    if (configObject.ContainsKey("chat.auto_query_msg_history.enabled")) configObject["chat.auto_query_msg_history.enabled"] = true;
-                    if (configObject.ContainsKey("chat.game_name_tag_line.enabled")) configObject["chat.game_name_tag_line.enabled"] = true;
-                    if (configObject.ContainsKey("chat.replace_rich_messages")) configObject["chat.replace_rich_messages"] = true;
-                    //if (configObject.ContainsKey("chat.require_jwt_presence.league_of_legends.enabled")) configObject["chat.require_jwt_presence.league_of_legends.enabled"] = true;
-                    if (configObject.ContainsKey("chat.require_keystone_presence.enabled")) configObject["chat.require_keystone_presence.enabled"] = true;
-                    //if (configObject.ContainsKey("chat.require_multi_game_presence_rxep.enabled")) configObject["chat.require_multi_game_presence_rxep.enabled"] = true;
+                    configObject["lol.client_settings.chat.use_proxy_to_riot_client"]?.Replace(true);
+                    configObject["lol.client_settings.rms.use_proxy_to_riot_client"]?.Replace(true);
+                    configObject["lol.client_settings.voice.use_proxy_to_riot_client"]?.Replace(true);
+                    configObject["lol.game_client_settings.leagues.enabled"]?.Replace(true);
+                    configObject["lol.game_client_settings.missions.enabled"]?.Replace(true);
 
-                    if (configObject.ContainsKey("lol.client_settings.chat.query_sumid_batched_ledge")) configObject["lol.client_settings.chat.query_sumid_batched_ledge"] = true;
-                    if (configObject.ContainsKey("lol.client_settings.chat.query_sumid_blocked")) configObject["lol.client_settings.chat.query_sumid_blocked"] = true;
-                    if (configObject.ContainsKey("lol.client_settings.chat.query_sumid_friend_requests")) configObject["lol.client_settings.chat.query_sumid_friend_requests"] = true;
-                    if (configObject.ContainsKey("lol.client_settings.chat.query_sumid_muc_participants")) configObject["lol.client_settings.chat.query_sumid_muc_participants"] = true;
-                    if (configObject.ContainsKey("lol.client_settings.chat.query_sumid_offline_friends")) configObject["lol.client_settings.chat.query_sumid_offline_friends"] = true;
-                    if (configObject.ContainsKey("lol.client_settings.chat.query_sumid_online_friends")) configObject["lol.client_settings.chat.query_sumid_online_friends"] = true;
+                    configObject["chat.aggressive_scan.enabled"]?.Replace(true);
+                    configObject["chat.auto_query_msg_history.enabled"]?.Replace(true);
+                    configObject["chat.force_filter.enabled"]?.Replace(true);
+                    configObject["chat.game_name_tag_line.enabled"]?.Replace(true);
+                    configObject["chat.replace_rich_messages"]?.Replace(true);
+                    //configObject["chat.require_jwt_presence.league_of_legends.enabled"]?.Replace(true);
+                    configObject["chat.require_keystone_presence.enabled"]?.Replace(true);
+                    // configObject["chat.require_multi_game_presence_rxep.enabled"]?.Replace(true);
 
-                    if (configObject.ContainsKey("lol.client_settings.chat.update_session_platform_id")) configObject["lol.client_settings.chat.update_session_platform_id"] = true;
-                    if (configObject.ContainsKey("lol.client_settings.chat.scoped_conversations.enabled")) configObject["lol.client_settings.chat.scoped_conversations.enabled"] = true;
+                    configObject["keystone.client.feature_flags.playerReporting.enabled"]?.Replace(true);
+                    configObject["keystone.client.feature_flags.restriction.enabled"]?.Replace(true);
+                    configObject["keystone.self_update.patchline_override"]?.Replace("KeystoneFoundationBetaWin");
+                    configObject["keystone.telemetry.newrelic_events_v2_enabled"]?.Replace(false);
+                    configObject["keystone.telemetry.newrelic_metrics_v1_enabled"]?.Replace(false);
+                    configObject["keystone.telemetry.metrics_enabled"]?.Replace(false);
+
+                    configObject["lol.client_settings.chat.allow_group_by_game"]?.Replace(true);
+                    configObject["lol.client_settings.chat.query_sumid_batched_ledge"]?.Replace(true);
+                    configObject["lol.client_settings.chat.query_sumid_blocked"]?.Replace(true);
+                    configObject["lol.client_settings.chat.query_sumid_friend_requests"]?.Replace(true);
+                    configObject["lol.client_settings.chat.query_sumid_muc_participants"]?.Replace(true);
+                    configObject["lol.client_settings.chat.query_sumid_offline_friends"]?.Replace(true);
+                    configObject["lol.client_settings.chat.query_sumid_online_friends"]?.Replace(true);
+                    configObject["lol.client_settings.chat.scoped_conversations.enabled"]?.Replace(true);
+                    configObject["lol.client_settings.chat.update_session_platform_id"]?.Replace(true);
+                    configObject["lol.game_client_settings.logging.enable_http_public_logs"]?.Replace(false);
+                    configObject["lol.game_client_settings.logging.enable_rms_public_logs"]?.Replace(false);
 
                     if (configObject["keystone.products.league_of_legends.patchlines.live"]?["platforms"]?["win"]?["configurations"] != null)
-                        foreach (var jToken in configObject["keystone.products.league_of_legends.patchlines.live"]["platforms"]["win"]["configurations"].Children())
+                        foreach (var jToken in configObject["keystone.products.league_of_legends.patchlines.live"]?["platforms"]?["win"]?["configurations"]!)
                         {
-                            jToken["patch_url"] = configObject["keystone.products.league_of_legends.patchlines.pbe"]["platforms"]["win"]["configurations"][0]["patch_url"];
-                            ((JArray) jToken["launcher"]["arguments"]).Add("--system-yaml-override=\"Config/system.yaml\"");
+                            //jToken["patch_url"] = configObject["keystone.products.league_of_legends.patchlines.pbe"]?["platforms"]?["win"]?["configurations"]?[0]?["patch_url"];
+                            //((JArray) jToken["launcher"]?["arguments"])?.Add("--system-yaml-override=\"Config/system.yaml\"");
 
-                            ((JArray) jToken["locale_data"]["available_locales"]).Add("en_GB");
-                            jToken["locale_data"]["default_locale"] = "en_GB";
+                            if (jToken["locale_data"]?["available_locales"] is JArray availableLocales && availableLocales.Values<string>().All(s => s != "en_GB")) availableLocales.Add("en_GB");
+                            jToken["locale_data"]?["default_locale"]?.Replace("en_GB");
                         }
 
-                    if (configObject.ContainsKey("lol.client_settings.anti_addiction.legacy_aas_enabled")) configObject["lol.client_settings.anti_addiction.legacy_aas_enabled"] = true;
-                    if (configObject.ContainsKey("lol.client_settings.rms.use_proxy_to_riot_client")) configObject["lol.client_settings.rms.use_proxy_to_riot_client"] = true;
-                    if (configObject.ContainsKey("lol.client_settings.voice.use_proxy_to_riot_client")) configObject["lol.client_settings.voice.use_proxy_to_riot_client"] = true;
-
-                    //if (configObject.ContainsKey("lol.game_client_settings.app_config.enabled_regions")) ((JArray) configObject["lol.game_client_settings.app_config.enabled_regions"])?.Add("EUW");
-                    //if (configObject.ContainsKey("lol.game_client_settings.app_config.enabled_regions")) ((JArray) configObject["lol.game_client_settings.app_config.enabled_regions"])?.Add("EUW1");
-
                     modifiedContent = JsonConvert.SerializeObject(configObject);
-                    //Console.WriteLine(modifiedContent);
+                    Console.WriteLine(modifiedContent);
                 }
                 catch (Exception ex)
                 {
@@ -136,7 +146,7 @@ namespace RiotLauncher
                 ctx.Response.SendChunked = false;
                 ctx.Response.ContentLength64 = responseBytes.Length;
                 ctx.Response.ContentType = "application/json";
-                ctx.Response.OutputStream.Write(responseBytes, 0, responseBytes.Length);
+                await ctx.Response.OutputStream.WriteAsync(responseBytes, 0, responseBytes.Length);
                 ctx.Response.OutputStream.Close();
             }
         }
