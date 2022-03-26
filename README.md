@@ -1,1 +1,3 @@
-RiotLauncher
+# RiotLauncher
+
+Launches Riot Games' games
