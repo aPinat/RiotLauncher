@@ -1,11 +1,12 @@
 ﻿using System.Diagnostics;
+using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace RiotLauncher;
 
-internal static class Program
+public static class Program
 {
     private const int Hide = 0;
     private const int Show = 5;
@@ -18,10 +19,9 @@ internal static class Program
 
     public static async Task Main(string[] args)
     {
-        if (args.Length == 1) ShowWindow(GetConsoleWindow(), Hide);
-
+        ShowWindow(GetConsoleWindow(), args.Length == 1 ? Hide : Show);
         Console.WriteLine("RiotLauncher");
-        Console.WriteLine("0. Kill all Riot processes");
+        Console.WriteLine("0. Kill all Riot Client processes");
         Console.WriteLine("1. Start Riot Client");
         Console.WriteLine("2. Start Riot Client duplicate");
         Console.WriteLine("3. Start Riot Client custom config");
@@ -40,24 +40,39 @@ internal static class Program
         Console.WriteLine("16. Start VALORANT custom config duplicate");
         Console.WriteLine("17. Start League of Legends custom config with PBE client on Live");
         Console.WriteLine();
-        // Console.WriteLine("20. Hide LCU");
-        // Console.WriteLine("21. Show LCU");
 
         Console.Write("Choose your option: ");
         int input;
 
         while (true)
         {
-            if (args.Length == 1) input = int.Parse(args[0]);
-            else int.TryParse(Console.ReadLine(), out input);
-            if (input is >= 0 and <= 17) break;
+            if (args.Length == 1)
+            {
+                input = int.Parse(args[0]);
+                break;
+            }
+
+            if (int.TryParse(Console.ReadLine(), out input) && input is >= 0 and <= 17)
+                break;
+
             Console.Write("Invalid input... Try again: ");
         }
 
         var riotClientPath = GetRiotClientPath();
         if (riotClientPath != null)
         {
-            await RunSelection(input, riotClientPath);
+            ShowWindow(GetConsoleWindow(), Hide);
+            if (IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners().All(endpoint => endpoint.Port != 2099))
+            {
+                var _ = new TcpProxy("prod.euw1.lol.riotgames.com", 2099);
+            }
+
+            if (IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners().All(endpoint => endpoint.Port != 5223))
+            {
+                var __ = new ChatProxy("euw1.chat.si.riotgames.com", 5223);
+            }
+
+            await RunSelectionAsync(input, riotClientPath);
         }
         else
         {
@@ -66,15 +81,15 @@ internal static class Program
         }
     }
 
-    private static async Task RunSelection(int input, string riotClientPath)
+    private static async Task RunSelectionAsync(int input, string riotClientPath)
     {
         Process process;
         ConfigProxy proxyServer;
-        IEnumerable<Process> leagueClientUx;
         switch (input)
         {
             case 0:
-                foreach (var p in Process.GetProcessesByName("RiotClientServices")) p.Kill(true);
+                foreach (var p in Process.GetProcessesByName("RiotClientServices"))
+                    p.Kill(true);
                 break;
             case 1:
                 Process.Start(riotClientPath, "");
@@ -86,15 +101,13 @@ internal static class Program
                 proxyServer = new ConfigProxy();
                 process = Process.Start(riotClientPath,
                     "--client-config-url=\"http://localhost:" + proxyServer.ConfigPort + "\"");
-                ShowWindow(GetConsoleWindow(), Hide);
-                await CheckRunningProcess(process);
+                await CheckRunningProcessAsync(process);
                 break;
             case 4:
                 proxyServer = new ConfigProxy();
                 process = Process.Start(riotClientPath,
                     "--client-config-url=\"http://localhost:" + proxyServer.ConfigPort + "\" --allow-multiple-clients");
-                ShowWindow(GetConsoleWindow(), Hide);
-                await CheckRunningProcess(process);
+                await CheckRunningProcessAsync(process);
                 break;
             case 5:
                 Process.Start(riotClientPath, "--launch-product=league_of_legends --launch-patchline=live");
@@ -106,15 +119,13 @@ internal static class Program
                 proxyServer = new ConfigProxy();
                 process = Process.Start(riotClientPath,
                     "--client-config-url=\"http://localhost:" + proxyServer.ConfigPort + "\" --launch-product=league_of_legends --launch-patchline=live");
-                ShowWindow(GetConsoleWindow(), Hide);
-                await CheckRunningProcess(process);
+                await CheckRunningProcessAsync(process);
                 break;
             case 8:
                 proxyServer = new ConfigProxy();
                 process = Process.Start(riotClientPath,
                     "--client-config-url=\"http://localhost:" + proxyServer.ConfigPort + "\" --launch-product=league_of_legends --launch-patchline=live --allow-multiple-clients");
-                ShowWindow(GetConsoleWindow(), Hide);
-                await CheckRunningProcess(process);
+                await CheckRunningProcessAsync(process);
                 break;
             case 9:
                 Process.Start(riotClientPath, "--launch-product=bacon --launch-patchline=live");
@@ -125,15 +136,13 @@ internal static class Program
             case 11:
                 proxyServer = new ConfigProxy();
                 process = Process.Start(riotClientPath, "--client-config-url=\"http://localhost:" + proxyServer.ConfigPort + "\" --launch-product=bacon --launch-patchline=live");
-                ShowWindow(GetConsoleWindow(), Hide);
-                await CheckRunningProcess(process);
+                await CheckRunningProcessAsync(process);
                 break;
             case 12:
                 proxyServer = new ConfigProxy();
                 process = Process.Start(riotClientPath,
                     "--client-config-url=\"http://localhost:" + proxyServer.ConfigPort + "\" --launch-product=bacon --launch-patchline=live --allow-multiple-clients");
-                ShowWindow(GetConsoleWindow(), Hide);
-                await CheckRunningProcess(process);
+                await CheckRunningProcessAsync(process);
                 break;
             case 13:
                 Process.Start(riotClientPath, "--launch-product=valorant --launch-patchline=live");
@@ -145,36 +154,19 @@ internal static class Program
                 proxyServer = new ConfigProxy();
                 process = Process.Start(riotClientPath,
                     "--client-config-url=\"http://localhost:" + proxyServer.ConfigPort + "\" --launch-product=valorant --launch-patchline=live");
-                ShowWindow(GetConsoleWindow(), Hide);
-                await CheckRunningProcess(process);
+                await CheckRunningProcessAsync(process);
                 break;
             case 16:
                 proxyServer = new ConfigProxy();
                 process = Process.Start(riotClientPath,
                     "--client-config-url=\"http://localhost:" + proxyServer.ConfigPort + "\" --launch-product=valorant --launch-patchline=live --allow-multiple-clients");
-                ShowWindow(GetConsoleWindow(), Hide);
-                await CheckRunningProcess(process);
+                await CheckRunningProcessAsync(process);
                 break;
             case 17:
-                proxyServer = new ConfigProxy(option: 17);
+                proxyServer = new ConfigProxy(input);
                 process = Process.Start(riotClientPath,
                     "--client-config-url=\"http://localhost:" + proxyServer.ConfigPort + "\" --launch-product=league_of_legends --launch-patchline=live");
-                ShowWindow(GetConsoleWindow(), Hide);
-                await CheckRunningProcess(process);
-                break;
-            case 20:
-                leagueClientUx = Utils.GetLeagueClientUx();
-                foreach (var client in leagueClientUx) await Utils.SendApiRequest(Utils.GetRiotAuth(client), HttpMethod.Post, "/riotclient/kill-ux", "");
-
-                break;
-            case 21:
-                leagueClientUx = Utils.GetLeagueClientUx();
-                foreach (var client in leagueClientUx)
-                {
-                    var s = await Utils.SendApiRequest(Utils.GetRiotAuth(client), HttpMethod.Post, "/riotclient/launch-ux", "");
-                    Console.WriteLine(s);
-                }
-
+                await CheckRunningProcessAsync(process);
                 break;
             default:
                 Console.WriteLine("Invalid input.");
@@ -182,32 +174,27 @@ internal static class Program
                 break;
         }
     }
-    
-    private static async Task CheckRunningProcess(Process process)
+
+    private static async Task CheckRunningProcessAsync(Process process)
     {
         await process.WaitForExitAsync();
         while (true)
         {
             var processes = Process.GetProcessesByName("RiotClientServices");
-            if (processes.Length == 0) return;
+            if (processes.Length == 0)
+                return;
             await Task.Delay(5000);
         }
     }
 
     private static string? GetRiotClientPath()
     {
-        // Find the RiotClientInstalls file.
-        var installPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-            "Riot Games/RiotClientInstalls.json");
-        if (!File.Exists(installPath)) return null;
+        var installPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Riot Games/RiotClientInstalls.json");
+        if (!File.Exists(installPath))
+            return null;
 
         var data = JsonSerializer.Deserialize<JsonNode>(File.ReadAllText(installPath));
-        var rcPaths = new List<string?>
-        {
-            data?["rc_default"]?.ToString(),
-            data?["rc_live"]?.ToString(),
-            data?["rc_beta"]?.ToString()
-        };
+        var rcPaths = new List<string?> { data?["rc_default"]?.ToString(), data?["rc_live"]?.ToString(), data?["rc_beta"]?.ToString() };
 
         return rcPaths.FirstOrDefault(File.Exists);
     }

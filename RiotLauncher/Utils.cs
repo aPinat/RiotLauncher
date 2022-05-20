@@ -1,27 +1,26 @@
 ﻿using System.Diagnostics;
 using System.Management;
-using System.Net;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace RiotLauncher;
 
 public static class Utils
 {
-    private static Regex TokenRegex { get; } = new("--remoting-auth-token=(.+?)[\"'\\s]");
-    private static Regex PortRegex { get; } = new("--app-port=(.+?)[\"'\\s]");
-    private static Regex RiotClientTokenRegex { get; } = new("--riotclient-auth-token=(.+?)[\"'\\s]");
-    private static Regex RiotClientPortRegex { get; } = new("--riotclient-app-port=(.+?)[\"'\\s]");
+    private static readonly Regex TokenRegex = new("--remoting-auth-token=(.+?)[\"'\\s]");
+    private static readonly Regex PortRegex = new("--app-port=(.+?)[\"'\\s]");
+    private static readonly Regex RiotClientTokenRegex = new("--riotclient-auth-token=(.+?)[\"'\\s]");
+    private static readonly Regex RiotClientPortRegex = new("--riotclient-app-port=(.+?)[\"'\\s]");
 
     public static IEnumerable<Process> GetRiotClientUx() => Process.GetProcessesByName("RiotClientUx");
 
     public static IEnumerable<Process> GetLeagueClientUx() => Process.GetProcessesByName("LeagueClientUx");
 
     public static IEnumerable<Process> GetLeagueClient() => Process.GetProcessesByName("LeagueClient");
-
-    public record RiotAuth(string Port, string Token);
 
     public static RiotAuth? GetRiotAuth(Process process, bool isRiotClient = false)
     {
@@ -33,13 +32,7 @@ public static class Utils
             var fileName = Assembly.GetEntryAssembly()?.Location;
             if (fileName != null)
             {
-                var currentProcessInfo = new ProcessStartInfo
-                {
-                    UseShellExecute = true,
-                    WorkingDirectory = Environment.CurrentDirectory,
-                    FileName = fileName,
-                    Verb = "runas"
-                };
+                var currentProcessInfo = new ProcessStartInfo { UseShellExecute = true, WorkingDirectory = Environment.CurrentDirectory, FileName = fileName, Verb = "runas" };
 
                 Process.Start(currentProcessInfo);
             }
@@ -70,15 +63,30 @@ public static class Utils
 
         return null;
     }
-    
-    public static async Task<string> SendApiRequest(RiotAuth? riotAuth, HttpMethod method, string endpointUrl, string body)
+
+    public static async Task<HttpResponseMessage> SendApiRequestAsync(RiotAuth riotAuth, HttpMethod method, string endpointUrl, object? body = null)
     {
-        ServicePointManager.ServerCertificateValidationCallback = (_, _, _, _) => true;
-        using var http = new HttpClient();
-        var auth = Convert.ToBase64String(Encoding.UTF8.GetBytes("riot:" + riotAuth?.Token));
+        using var http = new HttpClient(new HttpClientHandler { ServerCertificateCustomValidationCallback = (_, _, _, _) => true });
+        var auth = Convert.ToBase64String(Encoding.UTF8.GetBytes("riot:" + riotAuth.Token));
         http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", auth);
-        var requestMessage = new HttpRequestMessage(method, $"https://127.0.0.1:{riotAuth?.Port}{endpointUrl}") { Content = new StringContent(body, Encoding.UTF8, "application/json") };
-        var responseMessage = await http.SendAsync(requestMessage);
-        return await responseMessage.Content.ReadAsStringAsync();
+
+        endpointUrl = $"https://127.0.0.1:{riotAuth.Port}{endpointUrl}";
+        Console.WriteLine($"{method} {endpointUrl}");
+
+        if (method == HttpMethod.Post)
+            return await http.PostAsJsonAsync(endpointUrl, body);
+
+        if (method == HttpMethod.Put)
+            return await http.PutAsJsonAsync(endpointUrl, body);
+
+        using var requestMessage = new HttpRequestMessage(method, endpointUrl);
+        if (body is null)
+            return await http.SendAsync(requestMessage);
+
+        Console.WriteLine(JsonSerializer.Serialize(body));
+        requestMessage.Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
+        return await http.SendAsync(requestMessage);
     }
+
+    public record RiotAuth(string Port, string Token);
 }
