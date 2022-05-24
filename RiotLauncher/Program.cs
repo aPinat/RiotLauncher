@@ -21,6 +21,15 @@ public static class Program
     {
         ShowWindow(GetConsoleWindow(), args.Length == 1 ? Hide : Show);
         Console.WriteLine("RiotLauncher");
+        Console.WriteLine();
+
+        int input;
+        if (args.Length == 1)
+        {
+            input = int.Parse(args[0]);
+            goto SELECT;
+        }
+
         Console.WriteLine("0. Kill all Riot Client processes");
         Console.WriteLine("1. Start Riot Client");
         Console.WriteLine("2. Start Riot Client duplicate");
@@ -41,33 +50,26 @@ public static class Program
         Console.WriteLine("17. Start League of Legends custom config with PBE client on Live");
         Console.WriteLine();
 
-        Console.Write("Choose your option: ");
-        int input;
-
         while (true)
         {
-            if (args.Length == 1)
-            {
-                input = int.Parse(args[0]);
-                break;
-            }
-
+            Console.Write("Choose your option: ");
             if (int.TryParse(Console.ReadLine(), out input) && input is >= 0 and <= 17)
                 break;
-
-            Console.Write("Invalid input... Try again: ");
+            Console.WriteLine("Invalid input...");
         }
 
+    SELECT:
         var riotClientPath = GetRiotClientPath();
-        if (riotClientPath != null)
+        if (riotClientPath is not null)
         {
             ShowWindow(GetConsoleWindow(), Hide);
-            if (IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners().All(endpoint => endpoint.Port != 2099))
+            var activeTcpListeners = IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners();
+            if (activeTcpListeners.All(endpoint => endpoint.Port != 2099))
             {
                 var _ = new TcpProxy("prod.euw1.lol.riotgames.com", 2099);
             }
 
-            if (IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners().All(endpoint => endpoint.Port != 5223))
+            if (activeTcpListeners.All(endpoint => endpoint.Port != 5223))
             {
                 var __ = new ChatProxy("euw1.chat.si.riotgames.com", 5223);
             }
@@ -101,13 +103,13 @@ public static class Program
                 proxyServer = new ConfigProxy();
                 process = Process.Start(riotClientPath,
                     "--client-config-url=\"http://localhost:" + proxyServer.ConfigPort + "\"");
-                await CheckRunningProcessAsync(process);
+                await WaitForRiotClientExitAsync(process);
                 break;
             case 4:
                 proxyServer = new ConfigProxy();
                 process = Process.Start(riotClientPath,
                     "--client-config-url=\"http://localhost:" + proxyServer.ConfigPort + "\" --allow-multiple-clients");
-                await CheckRunningProcessAsync(process);
+                await WaitForRiotClientExitAsync(process);
                 break;
             case 5:
                 Process.Start(riotClientPath, "--launch-product=league_of_legends --launch-patchline=live");
@@ -119,13 +121,13 @@ public static class Program
                 proxyServer = new ConfigProxy();
                 process = Process.Start(riotClientPath,
                     "--client-config-url=\"http://localhost:" + proxyServer.ConfigPort + "\" --launch-product=league_of_legends --launch-patchline=live");
-                await CheckRunningProcessAsync(process);
+                await WaitForRiotClientExitAsync(process);
                 break;
             case 8:
                 proxyServer = new ConfigProxy();
                 process = Process.Start(riotClientPath,
                     "--client-config-url=\"http://localhost:" + proxyServer.ConfigPort + "\" --launch-product=league_of_legends --launch-patchline=live --allow-multiple-clients");
-                await CheckRunningProcessAsync(process);
+                await WaitForRiotClientExitAsync(process);
                 break;
             case 9:
                 Process.Start(riotClientPath, "--launch-product=bacon --launch-patchline=live");
@@ -136,13 +138,13 @@ public static class Program
             case 11:
                 proxyServer = new ConfigProxy();
                 process = Process.Start(riotClientPath, "--client-config-url=\"http://localhost:" + proxyServer.ConfigPort + "\" --launch-product=bacon --launch-patchline=live");
-                await CheckRunningProcessAsync(process);
+                await WaitForRiotClientExitAsync(process);
                 break;
             case 12:
                 proxyServer = new ConfigProxy();
                 process = Process.Start(riotClientPath,
                     "--client-config-url=\"http://localhost:" + proxyServer.ConfigPort + "\" --launch-product=bacon --launch-patchline=live --allow-multiple-clients");
-                await CheckRunningProcessAsync(process);
+                await WaitForRiotClientExitAsync(process);
                 break;
             case 13:
                 Process.Start(riotClientPath, "--launch-product=valorant --launch-patchline=live");
@@ -154,19 +156,19 @@ public static class Program
                 proxyServer = new ConfigProxy();
                 process = Process.Start(riotClientPath,
                     "--client-config-url=\"http://localhost:" + proxyServer.ConfigPort + "\" --launch-product=valorant --launch-patchline=live");
-                await CheckRunningProcessAsync(process);
+                await WaitForRiotClientExitAsync(process);
                 break;
             case 16:
                 proxyServer = new ConfigProxy();
                 process = Process.Start(riotClientPath,
                     "--client-config-url=\"http://localhost:" + proxyServer.ConfigPort + "\" --launch-product=valorant --launch-patchline=live --allow-multiple-clients");
-                await CheckRunningProcessAsync(process);
+                await WaitForRiotClientExitAsync(process);
                 break;
             case 17:
                 proxyServer = new ConfigProxy(input);
                 process = Process.Start(riotClientPath,
                     "--client-config-url=\"http://localhost:" + proxyServer.ConfigPort + "\" --launch-product=league_of_legends --launch-patchline=live");
-                await CheckRunningProcessAsync(process);
+                await WaitForRiotClientExitAsync(process);
                 break;
             default:
                 Console.WriteLine("Invalid input.");
@@ -175,7 +177,7 @@ public static class Program
         }
     }
 
-    private static async Task CheckRunningProcessAsync(Process process)
+    private static async Task WaitForRiotClientExitAsync(Process process)
     {
         await process.WaitForExitAsync();
         while (true)
@@ -183,7 +185,9 @@ public static class Program
             var processes = Process.GetProcessesByName("RiotClientServices");
             if (processes.Length == 0)
                 return;
-            await Task.Delay(5000);
+
+            await Task.WhenAll(processes.Select(p => p.WaitForExitAsync()));
+            await Task.Delay(TimeSpan.FromSeconds(5));
         }
     }
 

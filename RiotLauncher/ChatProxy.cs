@@ -1,4 +1,5 @@
-﻿using System.Net.Security;
+﻿using System.Net;
+using System.Net.Security;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
@@ -19,11 +20,14 @@ internal class ChatProxy : TcpProxy
         while (true)
         {
             var incoming = await _listener.AcceptTcpClientAsync();
+            var ipEndPoint = incoming.Client.RemoteEndPoint as IPEndPoint;
+            Console.WriteLine($"Incoming connection from {ipEndPoint}");
 
             var outgoing = new TcpClient(Hostname, _port);
             var outgoingSslStream = new SslStream(outgoing.GetStream());
             await outgoingSslStream.AuthenticateAsClientAsync(Hostname);
             new ChatProxyThread(incoming, outgoing, outgoingSslStream).StartThreads();
+            Console.WriteLine($"Finished setting up proxy for {ipEndPoint} to {Hostname}:{_port}");
         }
         // ReSharper disable once FunctionNeverReturns
     }

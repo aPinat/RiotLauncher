@@ -25,11 +25,14 @@ public class TcpProxy
         while (true)
         {
             var incoming = await _listener.AcceptTcpClientAsync();
+            var ipEndPoint = incoming.Client.RemoteEndPoint as IPEndPoint;
+            Console.WriteLine($"Incoming connection from {ipEndPoint}");
 
             var outgoing = new TcpClient(_hostname, _port);
             var outgoingSslStream = new SslStream(outgoing.GetStream());
             await outgoingSslStream.AuthenticateAsClientAsync(_hostname);
             new TcpProxyThread(incoming, outgoing, outgoingSslStream).StartThreads();
+            Console.WriteLine($"Finished setting up proxy for {ipEndPoint} to {_hostname}:{_port}");
         }
         // ReSharper disable once FunctionNeverReturns
     }

@@ -2,9 +2,9 @@
 
 Launches Riot Games' games in a custom way.
 
-Since this is for my own personal use, and not meant to be functional out of the box for anyone, I won't give any instructions on usage.
+Personal use project, not made for public consumption.
 
-The repo is only here for reference.
+Repo is only here for reference.
 
 ### Features
 

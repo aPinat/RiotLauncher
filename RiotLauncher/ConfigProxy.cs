@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
@@ -260,5 +260,6 @@ public class ConfigProxy
         ctx.Response.ContentType = "application/json";
         await ctx.Response.OutputStream.WriteAsync(responseBytes);
         ctx.Response.OutputStream.Close();
+        Console.WriteLine($"{ctx.Response.StatusCode} {result.StatusCode}");
     }
 }
