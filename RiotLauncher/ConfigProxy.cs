@@ -67,52 +67,77 @@ public class ConfigProxy
         if (config is null)
             goto RESPOND;
 
-        if (config["keystone.client.feature_flags.autoLaunch.disabled"] is JsonValue)
-            config["keystone.client.feature_flags.autoLaunch.disabled"] = false;
-        if (config["keystone.client.feature_flags.autoPatch.disabled"] is JsonValue)
-            config["keystone.client.feature_flags.autoPatch.disabled"] = false;
+
+        //// public config
+
+        // if (config["keystone.client.feature_flags.autoLaunch.disabled"] is JsonValue)
+        //     config["keystone.client.feature_flags.autoLaunch.disabled"] = true;
+        // if (config["keystone.client.feature_flags.autoPatch.disabled"] is JsonValue)
+        //     config["keystone.client.feature_flags.autoPatch.disabled"] = true;
         if (config["keystone.client.feature_flags.games_library.special_events.enabled"] is JsonValue)
             config["keystone.client.feature_flags.games_library.special_events.enabled"] = false;
+        // if (config["keystone.client.feature_flags.lifecycle.backgroundRunning.enabled"] is JsonValue)
+        //     config["keystone.client.feature_flags.lifecycle.backgroundRunning.enabled"] = true;
+        // if (config["keystone.client.feature_flags.lifecycle.bringUItoFGAfterGameExit.enabled"] is JsonValue)
+        //     config["keystone.client.feature_flags.lifecycle.bringUItoFGAfterGameExit.enabled"] = true;
         if (config["keystone.client.feature_flags.login.disabled"] is JsonValue)
             config["keystone.client.feature_flags.login.disabled"] = false;
-        if (config["keystone.client.feature_flags.playerReportingMailboxIntegration.enabled"] is JsonValue)
-            config["keystone.client.feature_flags.playerReportingMailboxIntegration.enabled"] = true;
-        if (config["keystone.client.feature_flags.playerReportingPasIntegration.enabled"] is JsonValue)
-            config["keystone.client.feature_flags.playerReportingPasIntegration.enabled"] = true;
-        if (config["keystone.client.feature_flags.playerReportingReporterFeedback.enabled"] is JsonValue)
-            config["keystone.client.feature_flags.playerReportingReporterFeedback.enabled"] = true;
+        // if (config["keystone.client.feature_flags.playerReportingMailboxIntegration.enabled"] is JsonValue)
+        //     config["keystone.client.feature_flags.playerReportingMailboxIntegration.enabled"] = true;
+        // if (config["keystone.client.feature_flags.playerReportingPasIntegration.enabled"] is JsonValue)
+        //     config["keystone.client.feature_flags.playerReportingPasIntegration.enabled"] = true;
+        // if (config["keystone.client.feature_flags.playerReportingReporterFeedback.enabled"] is JsonValue)
+        //     config["keystone.client.feature_flags.playerReportingReporterFeedback.enabled"] = true;
+        // if (config["keystone.client.feature_flags.product_settings.keep_updated.enabled"] is JsonValue)
+        //     config["keystone.client.feature_flags.product_settings.keep_updated.enabled"] = true;
+        // if (config["keystone.client.feature_flags.product_update_scanner.enabled"] is JsonValue)
+        //     config["keystone.client.feature_flags.product_update_scanner.enabled"] = true;
         if (config["keystone.client.feature_flags.regionlessLoginInfoTooltip.enabled"] is JsonValue)
             config["keystone.client.feature_flags.regionlessLoginInfoTooltip.enabled"] = false;
-        // if (config["keystone.client.feature_flags.product_settings.keep_updated.enabled"] is JsonValue)
-        // config["keystone.client.feature_flags.product_settings.keep_updated.enabled"] = true;
-        if (config["keystone.client.feature_flags.staySignedIn.disabled"] is JsonValue)
-            config["keystone.client.feature_flags.staySignedIn.disabled"] = true;
-        if (config["keystone.client.feature_flags.socialSignOn.enabled"] is JsonValue)
-            config["keystone.client.feature_flags.socialSignOn.enabled"] = false;
-        if (config["keystone.client.feature_flags.system_tray.enabled"] is JsonValue)
-            config["keystone.client.feature_flags.system_tray.enabled"] = true;
         if (config["keystone.client.feature_flags.restart_required.disabled"] is JsonValue)
             config["keystone.client.feature_flags.restart_required.disabled"] = true;
+        if (config["keystone.client.feature_flags.socialSignOn.enabled"] is JsonValue)
+            config["keystone.client.feature_flags.socialSignOn.enabled"] = false;
+        // if (config["keystone.client.feature_flags.staySignedIn.disabled"] is JsonValue)
+        //     config["keystone.client.feature_flags.staySignedIn.disabled"] = true;
+        if (config["keystone.client.feature_flags.system_tray.enabled"] is JsonValue)
+            config["keystone.client.feature_flags.system_tray.enabled"] = true;
 
         if (config["keystone.client_config.diagnostics_enabled"] is JsonValue)
             config["keystone.client_config.diagnostics_enabled"] = false;
         if (config["keystone.client_config.total_configs_to_save"] is JsonValue)
             config["keystone.client_config.total_configs_to_save"] = 5;
 
+        if (config["keystone.rewards.enabled"] is JsonValue)
+            config["keystone.rewards.enabled"] = true;
+
+        if (config["keystone.system_warning.polling_frequency"] is JsonValue)
+            config["keystone.system_warning.polling_frequency"] = int.MaxValue;
+        if (config["keystone.telemetry.heartbeat_interval"] is JsonValue)
+            config["keystone.telemetry.heartbeat_interval"] = int.MaxValue;
+        if (config["keystone.telemetry.heartbeat_products"] is JsonValue)
+            config["keystone.telemetry.heartbeat_products"] = false;
+
         if (config["lol.client_settings.lobby.tft_esports_spectator.enabled"] is JsonValue)
             config["lol.client_settings.lobby.tft_esports_spectator.enabled"] = true;
-        // Use new league edge instead of ACS, which is now shutdown
-        // if (config["lol.client_settings.match_history.gamhs.enabled"] is JsonValue)
-        //     config["lol.client_settings.match_history.gamhs.enabled"] = true;
-        // Use player platform instead of league edge, which returns 403 Forbidden now
-        // if (config["lol.client_settings.match_history.player_platform_edge.enabled"] is JsonValue)
-        //     config["lol.client_settings.match_history.player_platform_edge.enabled"] = true;
+        if (config["lol.client_settings.tft.tft_tastes_experiment_enabled"] is JsonValue)
+            config["lol.client_settings.tft.tft_tastes_experiment_enabled"] = true;
+        if (config["lol.client_settings.user_experience.should_reboot_with_high_memory_usage"] is JsonValue)
+            config["lol.client_settings.user_experience.should_reboot_with_high_memory_usage"] = false;
+
+        if (config["lol.game_client_settings.app_config.singular_enabled"] is JsonValue)
+            config["lol.game_client_settings.app_config.singular_enabled"] = false;
+        if (config["lol.game_client_settings.battle_pass.premium.enabled"] is JsonValue)
+            config["lol.game_client_settings.battle_pass.premium.enabled"] = true;
+        if (config["lol.game_client_settings.battlepasstoast_enabled"] is JsonValue)
+            config["lol.game_client_settings.battlepasstoast_enabled"] = true;
         if (config["lol.game_client_settings.leagues.enabled"] is JsonValue)
             config["lol.game_client_settings.leagues.enabled"] = true;
         if (config["lol.game_client_settings.missions.enabled"] is JsonValue)
             config["lol.game_client_settings.missions.enabled"] = true;
-        if (config["lol.client_settings.team_builder.pass_summoner_account_id_with_afk_readiness"] is JsonValue)
-            config["lol.client_settings.team_builder.pass_summoner_account_id_with_afk_readiness"] = true;
+        if (config["lol.game_client_settings.missions.pollingIntervalMs"] is JsonValue)
+            config["lol.game_client_settings.missions.pollingIntervalMs"] = 300000; // 5 minutes
+        // lol.game_client_settings.queues_displayed is JsonArray
         if (config["lol.game_client_settings.purchasing_enabled"] is JsonValue)
             config["lol.game_client_settings.purchasing_enabled"] = true;
         if (config["lol.game_client_settings.specialoffer_enabled"] is JsonValue)
@@ -123,6 +148,20 @@ public class ConfigProxy
             config["lol.game_client_settings.starshards_services_enabled"] = true;
         if (config["lol.game_client_settings.store_enabled"] is JsonValue)
             config["lol.game_client_settings.store_enabled"] = true;
+
+        // DEPRECATED
+        // Use new league edge instead of ACS, which is now shutdown
+        // if (config["lol.client_settings.match_history.gamhs.enabled"] is JsonValue)
+        //     config["lol.client_settings.match_history.gamhs.enabled"] = true;
+        // Use player platform instead of league edge, which returns 403 Forbidden now
+        // if (config["lol.client_settings.match_history.player_platform_edge.enabled"] is JsonValue)
+        //     config["lol.client_settings.match_history.player_platform_edge.enabled"] = true;
+        // Removed
+        // if (config["lol.client_settings.team_builder.pass_summoner_account_id_with_afk_readiness"] is JsonValue)
+        //     config["lol.client_settings.team_builder.pass_summoner_account_id_with_afk_readiness"] = true;
+
+
+        //// player config
 
         if (config["chat.aggressive_scan.enabled"] is JsonValue)
             config["chat.aggressive_scan.enabled"] = true;
@@ -145,8 +184,6 @@ public class ConfigProxy
             config["keystone.client.feature_flags.chrome_devtools.enabled"] = true;
         if (config["keystone.client.feature_flags.playerReporting.enabled"] is JsonValue)
             config["keystone.client.feature_flags.playerReporting.enabled"] = true;
-        if (config["keystone.client.feature_flags.restriction.enabled"] is JsonValue)
-            config["keystone.client.feature_flags.restriction.enabled"] = true;
         if (config["keystone.self_update.patchline_override"] is JsonValue || config["keystone.self_update.http_cookie"] is JsonValue)
             config["keystone.self_update.patchline_override"] = "KeystoneFoundationBetaWin"; // KeystoneFoundationLiveWin
         if (config["keystone.telemetry.metrics_enabled"] is JsonValue)
@@ -172,14 +209,14 @@ public class ConfigProxy
             config["lol.client_settings.chat.query_sumid_offline_friends"] = true;
         if (config["lol.client_settings.chat.query_sumid_online_friends"] is JsonValue)
             config["lol.client_settings.chat.query_sumid_online_friends"] = true;
-        if (config["lol.client_settings.chat.scoped_conversations.enabled"] is JsonValue)
-            config["lol.client_settings.chat.scoped_conversations.enabled"] = true;
-        if (config["lol.client_settings.chat.update_session_platform_id"] is JsonValue)
-            config["lol.client_settings.chat.update_session_platform_id"] = true;
-        if (config["lol.game_client_settings.logging.enable_http_public_logs"] is JsonValue)
-            config["lol.game_client_settings.logging.enable_http_public_logs"] = false;
-        if (config["lol.game_client_settings.logging.enable_rms_public_logs"] is JsonValue)
-            config["lol.game_client_settings.logging.enable_rms_public_logs"] = false;
+        // if (config["lol.client_settings.chat.scoped_conversations.enabled"] is JsonValue)
+        //     config["lol.client_settings.chat.scoped_conversations.enabled"] = true;
+        // if (config["lol.client_settings.chat.update_session_platform_id"] is JsonValue)
+        //     config["lol.client_settings.chat.update_session_platform_id"] = true;
+        // if (config["lol.game_client_settings.logging.enable_http_public_logs"] is JsonValue)
+        //     config["lol.game_client_settings.logging.enable_http_public_logs"] = false;
+        // if (config["lol.game_client_settings.logging.enable_rms_public_logs"] is JsonValue)
+        //     config["lol.game_client_settings.logging.enable_rms_public_logs"] = false;
 
 
         //// Custom League of Legends live patchline configuration
@@ -253,7 +290,7 @@ public class ConfigProxy
         content = config.ToJsonString();
         // Console.WriteLine(JsonSerializer.Deserialize<JsonNode>(content)?.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
 
-        RESPOND:
+    RESPOND:
         var responseBytes = Encoding.UTF8.GetBytes(content);
         ctx.Response.StatusCode = (int)result.StatusCode;
         ctx.Response.ContentLength64 = responseBytes.Length;
